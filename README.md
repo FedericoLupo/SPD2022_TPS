@@ -1,10 +1,12 @@
 # SPD2022_TPS
 
-https://www.tinkercad.com/things/3ioqUCZBYiq?sharecode=93sly8NV9u-gvZBS-3wbve7DoQTKdDvo5i7m-9DI3kY
+##GRUPO 8
 
-Grupo 8
-Integrantes:
-Miguel Villalba
-Jimena Nuñez
-Federico Lupo
-Rodrigo Ibarra
+#LINK de tinkercad: 
+                    https://www.tinkercad.com/things/3ioqUCZBYiq?sharecode=93sly8NV9u-gvZBS-3wbve7DoQTKdDvo5i7m-9DI3kY
+
+#Integrantes: 
+              Miguel Villalba
+              Rodrigo Ibarra
+              Federico Lupo
+              Jimena Nuñez
