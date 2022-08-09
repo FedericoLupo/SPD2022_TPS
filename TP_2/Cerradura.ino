@@ -4,6 +4,8 @@
 #include <Keypad.h>
 #include<string.h>
 
+////////////////////////////////DEFINES/////////////////////////////////////////////
+
 #define VERDE		9
 #define ROJO		10
 #define LEN 		7
@@ -17,15 +19,16 @@
 
 //Definimos leds
 int leds[2] = {VERDE, ROJO};
+
 //Definimos botónes
 int botones[3]= {BOTTON_C, BOTTON_R, BOTTON_T};
 
 //Definimos los pines de la pantalla
-LiquidCrystal lcd(8, 13, A0, A1, A2, A3);//Pines conectados al Arduino
+LiquidCrystal lcd(8, 13, A0, A1, A2, A3);	//Pines conectados al Arduino
 
 //Definimos los pines del teclado
-byte rowPins[ROWS] = { 7,6,5,4 }; 			//Pines conectados al Arduino
-byte colPins[COLS] = { 3,2,1,0 }; 
+byte rowPins[ROWS] = { 7,6,5,4 };			//Pines conectados al Arduino
+byte colPins[COLS] = { 3,2,1,0 };
 
 //Definimos el Keymap
 char keys[ROWS][COLS] = {
@@ -38,30 +41,11 @@ char keys[ROWS][COLS] = {
 //Keypad
 Keypad teclado = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-void setup()
-{
-  //Inicia la pantalla
-  lcd.begin(16,2);
-  
-  //Inicia los leds
-  for(int i=0;i<2;i++){
-    pinMode(leds[i],OUTPUT);
-  }
-  
-  //Inicia los Botones
-  for(int i=0;i<3;i++){
-    pinMode(botones[i],OUTPUT);
-  }
-  
-  //Seteamos el mensaje
-  mensajeUno("PASSWORD:",0,0);
-}
-
 //Definimos clave default
-char passDefault[LEN]= {'1','C','2','0','2','2'}; // Clave por default
-int posicion=0;    							//Necesaria para la clave
-int clave=0;       							//Para el LCD
-int cursor=7; 								//Posicion inicial de la clave en el LCD
+char passDefault[LEN]= {'1','C','2','0','2','2'};	// Clave por default
+int posicion=0;										//Necesaria para la clave
+int clave=0;       									//Para el LCD
+int cursor=7;						 //Posicion inicial de la clave en el LCD
 
 int i=0;
 int pulsacion=0;
@@ -75,6 +59,76 @@ char tecla;
 char cIngresada[LEN];
 int retorno=2;
 
+////////////////////////////FIN/DEFINES///////////////////////////////////////////
+
+void setup()
+{
+  //Inicia la pantalla
+  lcd.begin(16,2);
+
+  //Inicia los leds
+  for(int i=0;i<2;i++){
+    pinMode(leds[i],OUTPUT);
+  }
+
+  //Inicia los Botones
+  for(int i=0;i<3;i++){
+    pinMode(botones[i],OUTPUT);
+  }
+
+  //Seteamos el mensaje
+  mensajeUno("PASSWORD:",0,0);
+}
+
+////////////////////////////////BOTONES/////////////////////////////////////////////
+
+void botonReset()
+{
+    int botonAhora = digitalRead(BOTTON_R);
+
+    if (botonAhora== HIGH && botonAntes == LOW)
+    {
+        lcd.clear();
+      	cIngresada[LEN]='\0';
+      	i=0;
+      	cursor=7;
+     	mensajeUno("PASSWORD:",0,0);
+    }
+
+    botonAhora = botonAntes;
+}
+
+void botonConfig()
+{
+	int algo=1;
+    int botonAhora = digitalRead(BOTTON_C);
+
+    if (botonAhora == HIGH && botonAntesC == LOW)
+    {
+       //configuro contraseña;
+    }
+
+  	botonAntesC	=   botonAhora ;
+}
+
+int botonValidaPass()
+{
+	int rtn=1;
+    int botonAhora = digitalRead(BOTTON_T);
+
+    if (botonAhora == HIGH && botonAntesV == LOW)
+    {
+     //valida la contraseña ingresada;
+     testPass("Password OK", "Password Fail");
+     }
+
+  botonAntesV = botonAhora  ;
+
+  return rtn;
+}
+
+////////////////////////////FIN/BOTONES///////////////////////////////////////////
+
 void mensajeUno(char* imprime, int c,int f)
 {
   lcd.setCursor(c,f);
@@ -82,32 +136,33 @@ void mensajeUno(char* imprime, int c,int f)
 }
 
  void imprimealgo(){
-  
+
   for(int j=0;j<LEN;j++){
 	lcd.print(passDefault[j]);
   }
-}      
+}
 
 void enciendeLed(int pinled)
 {
   	digitalWrite(pinled,estado);
   	estado = !estado;
-  	
+
 }
 
 void secuenciaLed(int pin)
 {
     unsigned long millisAhora = millis();
- 
+
     if (millisAhora < TIME_LIMIT &&
       millisAhora - millisAntes >= LED_TIME  )
-    { 
-      
+    {
+
       	enciendeLed(pin);
-        millisAntes = millisAhora;     	
-    }  
+        millisAntes = millisAhora;
+    }
 }
-int guardarNuwPass()
+
+int guardarNewPass()
 {
   int j;
   for(j=0;j<LEN;j++){
@@ -117,88 +172,40 @@ int guardarNuwPass()
   return j;
 }
 
-
 int testPass(char* ok, char* error)
 {
   int rtn=2;
-  
-      if(strcmp(passDefault,cIngresada)== 0)
-    {
-      lcd.clear();
+
+  if(strcmp(passDefault,cIngresada)== 0)
+  {
+	  lcd.clear();
       lcd.print(ok);
       enciendeLed(VERDE);
-        
-        reset();
+
+    // reset();
 	//secuenciaLed(VERDE);
     rtn=0;
-    }
-    else
-    {
-      lcd.clear();
-      lcd.print(error);
-      enciendeLed(ROJO);
-      reset();
-
-      rtn=1;
-    }    
- return rtn;
+  }
+  else
+  {
+	  lcd.clear();
+	  lcd.print(error);
+	  enciendeLed(ROJO);
+	  //reset();
+	  rtn=1;
+  }
+  return rtn;
 }
+
 void reset()
 {
-    lcd.clear();
+	lcd.clear();
     cIngresada[LEN]='\0';
     i=0;
     cursor=7;
     mensajeUno("PASSWORD:",0,0);
 }
 
-void botonReset()
-{
-    int botonAhora = digitalRead(BOTTON_R);
-    
-    if (botonAhora== HIGH && botonAntes == LOW)
-    {
-     
-        lcd.clear();
-      	cIngresada[LEN]='\0';
-      	i=0;
-      	cursor=7;
-     	mensajeUno("PASSWORD:",0,0);
-      	
-    }
-
-    botonAhora = botonAntes;
-}
-
-void botonConfig()
-{int algo=1;
-    int botonAhora = digitalRead(BOTTON_C);
-    
-    if (botonAhora == HIGH && botonAntesC == LOW)
-    {
-       //configuro contraseña;
-  
-    }
-
-  	botonAntesC	=   botonAhora ;
-}
-
-int botonValidaPass()
-{
- int rtn=1;
-    int botonAhora = digitalRead(BOTTON_T);
-    
-    if (botonAhora == HIGH && botonAntesV == LOW)
-    {
-      
-        //valida la contraseña ingresada;
-     testPass("Password OK", "Password Fail");
-     }
-
-  botonAntesV = botonAhora  ;
-  
-  return rtn;
-}
 int imprime()
 {
   int rtn=1;
@@ -206,14 +213,15 @@ int imprime()
   if (pulsacion != 0 && i <= 5) 		//Si el valor es 0 es que no se ha pulsado ninguna tecla
   {
     cIngresada[i] = pulsacion;
-    lcd.print(pulsacion); 				//Imprimimos pulsacion 
-    i++; 
+    lcd.print(pulsacion); 				//Imprimimos pulsacion
+    i++;
     cursor++;             				//Incrementamos el cursor
   	rtn=0;
   }
-
+  testPass;
   return rtn;
 }
+
 void loop()
 {/*
   char pulsacion = teclado.getKey() ; 	//Leemos pulsacion
@@ -249,30 +257,31 @@ void loop()
        lcd.setCursor(7,1);
        lcd.print(" "); // borramos de la pantalla los numeros
        lcd.setCursor(7,1);
-    
+
        digitalWrite(ROJO,HIGH); // encendemos el LED rojo
        digitalWrite(VERDE, LOW); // apagamos el verde
-  
-  }*/
-  
- imprime();
-  botonReset();
-  botonValidaPass();
-  botonConfig();
-  if(botonAntesC== HIGH)
-  {
-	 //imprime();
-      //configuro contraseña;
-      lcd.clear();
-      mensajeUno("CONFIGURACION",0,0);
-      mensajeUno("NEW PASS:",0,1);
-    if(pulsacion==6){
-      lcd.clear();
-      guardarNuwPass();
-        mensajeUno("PASS GUARDADO",0,1);
-    }
 
-  }
+  }*/
+
+	imprime();
+	botonReset();
+	botonValidaPass();
+	botonConfig();
+	if(botonAntesC== HIGH)
+	{
+		//imprime();
+		//configuro contraseña;
+		lcd.clear();
+		mensajeUno("CONFIGURACION",0,0);
+		mensajeUno("NEW PASS:",0,1);
+		if(pulsacion==6)
+		{
+			lcd.clear();
+			guardarNewPass();
+			mensajeUno("PASS GUARDADO",0,1);
+		}
+	}
+
 /*if(botonAntesV == HIGH){
        retorno=testPass("Password OK", "Password Fail");
     if(retorno==0){
@@ -282,8 +291,6 @@ void loop()
         enciendeLed(ROJO);
 }
     }*/
-  
-  
-  
+
 delay(100);
- }
+}
